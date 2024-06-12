@@ -1,27 +1,35 @@
 ﻿using CityInfo.API.Models;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace CityInfo.API.Controllers
 {
     [ApiController]
     [Route("api/cities")]
-    public class CitiesController  : ControllerBase
+    public class CitiesController : ControllerBase
     {
-        [HttpGet]
-        public ActionResult<IEnumerable<CityDto>> GetCities() 
+        private readonly CitiesDataStore _citiesDataStore;
+
+        public CitiesController(CitiesDataStore citiesDataStore)
         {
-            return Ok(CitiesDataStore.Current.Cities);
-             
+            _citiesDataStore = citiesDataStore ?? throw new ArgumentNullException(nameof(citiesDataStore));
+        }
+
+        [HttpGet]
+        public ActionResult<IEnumerable<CityDto>> GetCities()
+        {
+            return Ok(_citiesDataStore.Cities);
         }
 
         [HttpGet("{id}")]
         public ActionResult<CityDto> GetCity(int id)
-        { 
+        {
             // find city
-            var cityToReturn = CitiesDataStore.Current.Cities
+            var cityToReturn = _citiesDataStore.Cities
                 .FirstOrDefault(c => c.Id == id);
 
-            if (cityToReturn == null) 
+            if (cityToReturn == null)
             {
                 return NotFound();
             }
